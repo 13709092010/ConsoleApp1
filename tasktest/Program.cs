@@ -2,9 +2,104 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace tasktest
 {
+    public static class CallBackTask
+    {
+        static CallBackTask()
+        {
+            TaskList = new List<(string, string)>();
+            Task.Run(() =>
+            {
+                RunTask();
+            });
+        }
+        public static object _lock = new object();
+        public static List<(string, string)> TaskList { get; set; }
+
+        public static void AddTask(string url, string modelJson)
+        {
+            lock (_lock)
+            {
+                TaskList.Add((url, modelJson));
+            }
+        }
+        public static void RunTask()
+        {
+            //var logRpc = IocUnityExtend.GetInterface<ILogContract>();
+
+            while (true)
+            {
+                var task = TaskList.FirstOrDefault();
+                try
+                {
+                    if (!string.IsNullOrEmpty(task.Item1))
+                    {
+                        Send(task.Item1, task.Item2);
+                        TaskList.Remove(task);
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        Thread.Sleep(10000);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //logRpc.AddLogContract(LogTypeEnum.DevloperCallBack, "回调任务执行异常,异常信息：" + ex.Message, task.Item2, "", task.Item1).GetAwaiter().GetResult();
+                    TaskList.Remove(task);
+                }
+            }
+        }
+
+        static HttpStatusCode Send(string url, string modelJson)
+        {
+            //^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$
+            if (!Regex.IsMatch(url, @"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&%\$#_]*)?$"))
+            {
+                //log.AddLogContract("", "回调地址有误", modelJson, "", url).GetAwaiter().GetResult();
+                return HttpStatusCode.NotFound;
+            }
+            HttpClient httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromMilliseconds(1000 * 10);//10秒
+
+            StringContent str = new StringContent(modelJson, Encoding.UTF8, "application/json");
+            //str.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            try
+            {
+                var result = httpClient.PostAsync(url, str).Result;
+                if (result.StatusCode != HttpStatusCode.OK)
+                {
+                    //log.AddLogContract("", "请求失败/超时", modelJson, "", url).GetAwaiter().GetResult();
+                }
+                return result.StatusCode;
+            }
+            catch (Exception ex)
+            {
+                //log.AddLogContract("", "回调任务执行异常,异常信息：" + ex.Message, modelJson, "", url).GetAwaiter().GetResult();
+                return HttpStatusCode.InternalServerError;
+            }
+
+
+        }
+
+        /// <summary>
+        /// 获取时间戳
+        /// </summary>
+        /// <returns></returns>
+        static long GetTimeStamp()
+        {
+            TimeSpan ts = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalSeconds);
+        }
+    }
     class Program
     {
 
