@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CDynamic.EF" Version="1.0.3.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+	  <PackageReference Include="Acb.MiddleWare.Core" Version="1.0.8.4" />
   </ItemGroup>
 
 </Project>

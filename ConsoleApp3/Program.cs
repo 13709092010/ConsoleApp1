@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Dynamic.Core.Log;
+using MutualInsuranceThird.Plugin.Log;
+using MutualInsuranceThird.Plugin.Log.Repository;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +16,7 @@ namespace ConsoleApp3
     {
         static void Main(string[] args)
         {
+            LoggerManager.InitLogger(new LogConfig());
             //var data = new ThirdAppInputOrderDto();
             //data.InputOrderType = 0;
             //data.Phone = "13551455604";
@@ -49,35 +53,116 @@ namespace ConsoleApp3
             data.Amount = 99.9000M;
             data.IsNewVehicle = true;
             data.AutomaticDeductions = false;
-            data.AutoPayEndTime = DateTime.Now ;
+            data.AutoPayEndTime = DateTime.Now;
             data.JoinType = 0;
             data.VehicleLicenseImage = "http://file.i-cbao.com/uploads/pictures/2020/0909/eea924f3dad4cfb6.jpg";
             data.Images = new List<ImageListReturnDto>();
             data.IsActive = false;
             data.DiscountPackageId = "A98F07DAA35149E4921C6B06DDC1140D";
-         
+
             var rendom = new Random();
             List<Task> tasks = new List<Task>();
             var testUrl = "http://192.168.0.252:7019";
             var localUrl = "http://192.168.2.134:9099";
-            for (int i = 0; i < 100; i++)
+
+            for (int i = 0; i < 1000; i++)
             {
                 tasks.Add(Task.Run(() =>
                 {
-                    for (int j = 0; j < 10; j++)
-                    {
-                        HttpExtend http = new HttpExtend();
-                        data.VehicleFrameNumber = "77772312891" + rendom.Next(100000, 999999);
-                        Console.WriteLine(JsonConvert.SerializeObject(http.Post<AddInputOrderDto, dynamic>($"{localUrl}/api/InputOrder/sales/AddInputOrderHttp", data).Result));
-                    }
+                    //for (int j = 0; j < 1; j++)
+                    //{
+                    HttpExtend http = new HttpExtend();
+                    data.Phone = "130" + rendom.Next(10000000, 99999999);
+                    data.VehicleFrameNumber = DateTime.Now.ToString("MMddHHmmss") + rendom.Next(1000000, 9999999);
+                    Console.WriteLine(JsonConvert.SerializeObject(http.Post<AddInputOrderDto, dynamic>($"{testUrl}/api/InputOrder/sales/AddInputOrderHttp", data).Result));
+                    //}
+
                 }));
             }
             Task.WaitAll(tasks.ToArray());
             Console.ReadKey();
+            //LogPluginConfig logPluginConfig = new LogPluginConfig()
+            //{
+            //    DbConfig = new Dynamic.Core.ViewModel.DBCfgViewModel
+            //    {
+            //        AutoOrmType = 0,
+            //        CurrentDBType = Dynamic.Core.ViewModel.DBType.PgSql,
+            //        ExtendConnectStr = null,
+            //        _AccessDBViewModel = null,
+            //        _DB2DBViewModel = null,
+            //        _MySqlDBViewModel = null,
+            //        _OracleDBViewModel = null,
+            //        _PgSqlDBViewModel = new Dynamic.Core.ViewModel.PgSqlDBViewModel
+            //        {
+            //            DataSource = "MutualAid2_0_0_Third",
+            //            DBAddress = "192.168.0.234",
+            //            Password = "",
+            //            Port = 5432,
+            //            UserID = "postgres",
+            //        },
+            //        _SqlServerDBViewModel = null,
+            //    }
+            //};
+
+            //LogRepository logRepository = new LogRepository(logPluginConfig.DbConfig);
+
+            //for (int i = 0; i < 10000; i++)
+            //{
+            //    Task.Run(() =>
+            //    {
+            //        //HttpExtend http = new HttpExtend();
+            //        //data.VehicleFrameNumber = DateTime.Now.ToString("MMddHHmmss") + rendom.Next(1000000, 9999999);
+            //        //var ret = http.Get<AddInputOrderDto, dynamic>($"{localUrl}/api/Organization/manage/test1", data).Result;
+            //        //Console.WriteLine(JsonConvert.SerializeObject(ret));
+            //        var ret=  logRepository.InsertSync1(new MutualInsuranceThird.Plugin.Log.Entities.TLog
+            //        {
+            //            Creater = "测试",
+            //            CreateTime = DateTime.Now,
+            //            Describe = "***",
+            //            Id = Guid.NewGuid().ToString("N"),
+            //            JsonExtension = "***",
+            //            RelationId = "***",
+            //            Routing = "***",
+            //            Type = 1
+            //        });
+            //    //Console.WriteLine(JsonConvert.SerializeObject(ret));
+            //    });
+            //}
+
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Task.Run(() =>
+            //    {
+            //        HttpExtend http = new HttpExtend();
+            //        data.VehicleFrameNumber = DateTime.Now.ToString("MMddHHmmss") + rendom.Next(1000000, 9999999);
+            //        var ret = http.Get<AddInputOrderDto, dynamic>($"{localUrl}/api/InputOrder/sales/TestTrans", data).Result;
+            //        Console.WriteLine(JsonConvert.SerializeObject(ret));
+            //    });
+            //}
+
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Task.Run(() =>
+            //    {
+            //        HttpExtend http = new HttpExtend();
+            //        data.VehicleFrameNumber = DateTime.Now.ToString("MMddHHmmss") + rendom.Next(1000000, 9999999);
+            //        var ret = http.Get<para, dynamic>($"https://ifch.i-cbao.com/hzdevelop/api/Organization/manage/GetOrgHttp", new para {  id= "b667509e2888cb4a3a5208d8500f49a6" }).Result;
+            //        Console.WriteLine(JsonConvert.SerializeObject(ret));
+            //    });
+            //}
+            //Console.ReadKey();
+
+
         }
 
- 
+  
+
     }
+    public class para
+    {
+        public string id { get; set; }
+    }
+
     public class HttpExtend
     {
         /// <summary>
@@ -92,8 +177,8 @@ namespace ConsoleApp3
         {
             HttpClient httpClient = new HttpClient();
             //httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            httpClient.DefaultRequestHeaders.Add("sToken", "sToken:dae1d7b5b45acbdb872b08d8566d2c8d");
-            httpClient.DefaultRequestHeaders.Add("sOrgId", "c0991a691d92c5c05e4908d83f980ec8,84e2a9fdc154cfdd7b0208d76cd49fb4");
+            //httpClient.DefaultRequestHeaders.Add("sToken", "sToken:ad38ee1ee36dc44cc12a08d85992a3f9");
+            //httpClient.DefaultRequestHeaders.Add("sOrgId", "749f3b9bc97acfbca91308d8597f0a50");
             var paramStr = ModelToHttpParam<T>.ToGetParam(param);
             var requstResult = await httpClient.GetAsync(url + paramStr);
             var result = string.Empty;
@@ -142,8 +227,8 @@ namespace ConsoleApp3
 
             var strContent = new StringContent(paramStr);
             strContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");// ("content-type", "application/json");
-            httpClient.DefaultRequestHeaders.Add("sToken", "sToken:1a35d455b788c1d56eef08d8565f4f17");
-            httpClient.DefaultRequestHeaders.Add("sOrgId", "84e2a9fdc154cfdd7b0208d76cd49fb4");
+            httpClient.DefaultRequestHeaders.Add("sToken", "sToken:f1ddf7b979f7c8f72c1108d85c8e80a6");
+            httpClient.DefaultRequestHeaders.Add("sOrgId", "a518ed31d76fccfe77f108d85c888ff5");
             var requstResult = await httpClient.PostAsync(url, strContent);
             var result = string.Empty;
             using (requstResult)
@@ -363,7 +448,7 @@ namespace ConsoleApp3
         /// <summary>
         /// 客户手机
         /// </summary>
-        public List<string> Images { get; set; } 
+        public List<string> Images { get; set; }
     }
     public enum JoinTypeEnum
     {
