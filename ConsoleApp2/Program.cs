@@ -14,16 +14,25 @@ namespace ConsoleApp2
             List<(x?, int)> statusess = new List<(x?, int)>();
             var xxx = statusess.FirstOrDefault(t => t.Item1 == x.d);
 
+            Func<string, int> a = new Func<string, int>(Test2);
 
             Console.WriteLine("Hello World!");
         }
 
+        static int Test2(string str)
+        {
+            return 100;
+        }
     }
-    public enum x { 
-    a,
-    b,
-    c,
-    d
-    
+    public enum x
+    {
+        a,
+        b,
+        c,
+        d
+
     }
+
+
+
 }

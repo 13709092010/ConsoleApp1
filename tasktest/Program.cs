@@ -37,6 +37,7 @@ namespace tasktest
 
             while (true)
             {
+                Thread.Sleep(1);
                 var task = TaskList.FirstOrDefault();
                 try
                 {

@@ -227,8 +227,8 @@ namespace ConsoleApp3
 
             var strContent = new StringContent(paramStr);
             strContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");// ("content-type", "application/json");
-            httpClient.DefaultRequestHeaders.Add("sToken", "sToken:f1ddf7b979f7c8f72c1108d85c8e80a6");
-            httpClient.DefaultRequestHeaders.Add("sOrgId", "a518ed31d76fccfe77f108d85c888ff5");
+            httpClient.DefaultRequestHeaders.Add("sToken", "sToken:3a044cc0c61fcdfa14c608d8617dc4ea");
+            httpClient.DefaultRequestHeaders.Add("sOrgId", "bc4171c2e46ecf7d556808d8607877a5");
             var requstResult = await httpClient.PostAsync(url, strContent);
             var result = string.Empty;
             using (requstResult)
